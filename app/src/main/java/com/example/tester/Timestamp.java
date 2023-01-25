@@ -244,7 +244,7 @@ public class Timestamp extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 long currentTimestamp = System.currentTimeMillis();
-                DocumentReference docRef = db.collection("CollectionName").document("DocumentID");
+                DocumentReference docRef = db.collection("TIMESTAMP").document("test");
                 docRef.get()
                         .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                             @Override
