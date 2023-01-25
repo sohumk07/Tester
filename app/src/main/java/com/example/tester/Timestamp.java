@@ -244,24 +244,73 @@ public class Timestamp extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 long currentTimestamp = System.currentTimeMillis();
-                if (startTimestamp == 0) {
-                    startTimestamp = currentTimestamp;
-                    DocumentReference docRef = db.collection("TIMESTAMP").document("test");
-                    Toast.makeText(Timestamp.this, "Start Time: " + startTimestamp, Toast.LENGTH_SHORT).show();
+                DocumentReference docRef = db.collection("CollectionName").document("DocumentID");
+                docRef.get()
+                        .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    DocumentSnapshot document = task.getResult();
+                                    if (document.exists()) {
+                                        if (document.get("startTimestamp") == null) {
+                                            //start timestamp is empty
+                                            docRef.update("startTimestamp", currentTimestamp)
+                                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                        @Override
+                                                        public void onSuccess(Void aVoid) {
+                                                            Toast.makeText(Timestamp.this, "Start Time successfully Updated", Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    })
+                                                    .addOnFailureListener(new OnFailureListener() {
+                                                        @Override
+                                                        public void onFailure(@NonNull Exception e) {
+                                                            Toast.makeText(Timestamp.this, "Error updating start timestamp", Toast.LENGTH_SHORT).show();
 
-                    docRef.update("startTimestamp",startTimestamp);
-                } else {
-                    endTimestamp = currentTimestamp;
-                    DocumentReference docRef = db.collection("TIMESTAMP").document("test");
-                    Toast.makeText(Timestamp.this, "End Time: " + endTimestamp, Toast.LENGTH_SHORT).show();
 
-                    docRef.update("endTimestamp",endTimestamp);
-                    totalTime = endTimestamp - startTimestamp;
-                    Toast.makeText(Timestamp.this, "Total Time: " + totalTime, Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    });
+                                        } else if (document.get("endTimestamp") == null) {
+                                            //end timestamp is empty
+                                            docRef.update("endTimestamp", currentTimestamp)
+                                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                        @Override
+                                                        public void onSuccess(Void aVoid) {
+                                                            Toast.makeText(Timestamp.this, "End timestamp successfully updated!", Toast.LENGTH_SHORT).show();
 
-                    docRef.update("totalTime",totalTime);
-                }
+                                                        }
+                                                    })
+                                                    .addOnFailureListener(new OnFailureListener() {
+                                                        @Override
+                                                        public void onFailure(@NonNull Exception e) {
+                                                            Toast.makeText(Timestamp.this, "Error updating end timestamp", Toast.LENGTH_SHORT).show();
+
+                                                        }
+                                                    });
+                                        } else {
+                                            long start = (long) document.get("startTimestamp");
+                                            long end = (long) document.get("endTimestamp");
+                                            long total = end - start;
+                                            docRef.update("totalTime", total)
+                                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                                        @Override
+                                                        public void onSuccess(Void aVoid) {
+                                                            Toast.makeText(Timestamp.this, "Total Time successfully Updated", Toast.LENGTH_SHORT).show();
+
+                                                        }
+                                                    })
+                                                    .addOnFailureListener(new OnFailureListener() {
+                                                        @Override
+                                                        public void onFailure(@NonNull Exception e) {
+                                                            Toast.makeText(Timestamp.this, "Error updating total time", Toast.LENGTH_SHORT).show();
+                                                        }
+                                                    });
+                                        }
+                                    }
+                                }
+                            }
+                        });
             }
         });
+
     }
 }
